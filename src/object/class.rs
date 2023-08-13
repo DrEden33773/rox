@@ -4,7 +4,7 @@ use gc::{Finalize, Trace};
 
 use crate::value::Value;
 
-#[derive(Trace, Finalize, PartialEq, Eq)]
+#[derive(Trace, Finalize, PartialEq, Debug)]
 pub struct Class {
   pub member_value: HashMap<String, Value>,
 }

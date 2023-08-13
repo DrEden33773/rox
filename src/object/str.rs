@@ -1,9 +1,13 @@
 use gc::{Finalize, Gc, Trace};
 
+use crate::value::Value;
+
+use super::Object;
+
 const SHORT_STR_MAX: usize = 14;
 const MID_STR_MAX: usize = 48;
 
-#[derive(Trace, Finalize)]
+#[derive(Trace, Finalize, Debug)]
 pub enum Str {
   ShortStr((u8, [u8; SHORT_STR_MAX])),
   MidStr(Gc<(u8, [u8; MID_STR_MAX])>),
@@ -33,8 +37,8 @@ impl From<Vec<u8>> for Str {
   }
 }
 impl From<&str> for Str {
-  fn from(_str: &str) -> Self {
-    _str.as_bytes().into()
+  fn from(seq: &str) -> Self {
+    seq.as_bytes().into()
   }
 }
 impl From<String> for Str {
@@ -43,12 +47,64 @@ impl From<String> for Str {
   }
 }
 
+impl<'a> From<&'a Object> for &'a [u8] {
+  fn from(obj: &'a Object) -> Self {
+    match obj {
+      Object::String(str) => match str {
+        Str::ShortStr((len, buf)) => &buf[..*len as usize],
+        Str::MidStr(str) => &str.1[..str.0 as usize],
+        Str::LongStr(str) => str.as_slice(),
+      },
+      // simple serializer for class
+      Object::Class(class) => Box::leak(Box::new(format!("{:?}", class))).as_bytes(),
+    }
+  }
+}
+impl<'a> From<&'a Object> for &'a str {
+  fn from(obj: &'a Object) -> Self {
+    std::str::from_utf8(obj.into()).unwrap()
+  }
+}
+impl From<&Object> for String {
+  fn from(obj: &Object) -> Self {
+    String::from_utf8_lossy(obj.into()).to_string()
+  }
+}
+
+impl<'a> From<&'a Value> for &'a [u8] {
+  fn from(value: &'a Value) -> Self {
+    match value {
+      Value::Nil => "nil".as_bytes(),
+      Value::Boolean(b) => {
+        if *b {
+          "true".as_bytes()
+        } else {
+          "false".as_bytes()
+        }
+      }
+      Value::Integer(i) => Box::leak(Box::new(i.to_string())).as_bytes(),
+      Value::Float(f) => Box::leak(Box::new(f.to_string())).as_bytes(),
+      Value::Object(obj) => obj.into(),
+    }
+  }
+}
+impl<'a> From<&'a Value> for &'a str {
+  fn from(value: &'a Value) -> Self {
+    std::str::from_utf8(value.into()).unwrap()
+  }
+}
+impl From<&Value> for String {
+  fn from(value: &Value) -> Self {
+    String::from_utf8_lossy(value.into()).to_string()
+  }
+}
+
 impl PartialEq for Str {
   fn eq(&self, other: &Self) -> bool {
     match (self, other) {
-      (Self::ShortStr(l0), Self::ShortStr(r0)) => l0.1[..l0.0 as usize] == r0.1[..r0.0 as usize],
-      (Self::MidStr(l0), Self::MidStr(r0)) => l0.1[..l0.0 as usize] == r0.1[..r0.0 as usize],
-      (Self::LongStr(l0), Self::LongStr(r0)) => *l0 == *r0,
+      (Self::ShortStr(ls), Self::ShortStr(rs)) => ls.1[..ls.0 as usize] == rs.1[..rs.0 as usize],
+      (Self::MidStr(ls), Self::MidStr(rs)) => ls.1[..ls.0 as usize] == rs.1[..rs.0 as usize],
+      (Self::LongStr(ls), Self::LongStr(rs)) => *ls == *rs,
       _ => false,
     }
   }

@@ -2,7 +2,7 @@ use gc::{Finalize, Trace};
 
 use crate::object::Object;
 
-#[derive(Trace, Finalize)]
+#[derive(Trace, Finalize, Debug)]
 pub enum Value {
   Nil,
   Boolean(bool),

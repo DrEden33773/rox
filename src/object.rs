@@ -6,7 +6,7 @@ use gc::{Finalize, Gc, Trace};
 use self::class::Class;
 use self::str::Str;
 
-#[derive(Trace, Finalize)]
+#[derive(Trace, Finalize, Debug)]
 pub enum Object {
   String(Str),
   Class(Gc<Class>),
