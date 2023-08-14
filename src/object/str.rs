@@ -1,8 +1,6 @@
-use gc::{Finalize, Gc, Trace};
-
-use crate::value::Value;
-
 use super::Object;
+use crate::value::Value;
+use gc::{Finalize, Gc, Trace};
 
 const SHORT_STR_MAX: usize = 14;
 const MID_STR_MAX: usize = 48;
@@ -12,6 +10,15 @@ pub enum Str {
   ShortStr((u8, [u8; SHORT_STR_MAX])),
   MidStr(Gc<(u8, [u8; MID_STR_MAX])>),
   LongStr(Gc<Vec<u8>>),
+}
+
+impl std::ops::Add for Str {
+  type Output = Str;
+  fn add(self, rhs: Self) -> Self::Output {
+    let mut temp = String::from(&self);
+    temp += (&rhs).into();
+    temp.into()
+  }
 }
 
 impl From<&[u8]> for Str {
@@ -47,16 +54,32 @@ impl From<String> for Str {
   }
 }
 
+impl<'a> From<&'a Str> for &'a [u8] {
+  fn from(string: &'a Str) -> Self {
+    match string {
+      Str::ShortStr((len, buf)) => &buf[..*len as usize],
+      Str::MidStr(str) => &str.1[..str.0 as usize],
+      Str::LongStr(str) => str.as_slice(),
+    }
+  }
+}
+impl<'a> From<&'a Str> for &'a str {
+  fn from(string: &'a Str) -> Self {
+    std::str::from_utf8(string.into()).unwrap()
+  }
+}
+impl From<&Str> for String {
+  fn from(string: &Str) -> Self {
+    String::from_utf8_lossy(string.into()).to_string()
+  }
+}
+
 impl<'a> From<&'a Object> for &'a [u8] {
   fn from(obj: &'a Object) -> Self {
     match obj {
-      Object::String(str) => match str {
-        Str::ShortStr((len, buf)) => &buf[..*len as usize],
-        Str::MidStr(str) => &str.1[..str.0 as usize],
-        Str::LongStr(str) => str.as_slice(),
-      },
+      Object::String(str) => str.into(),
       // simple serializer for class
-      Object::Class(class) => Box::leak(Box::new(format!("{:?}", class))).as_bytes(),
+      Object::Class(class) => Box::leak(Box::new(format!("{:#?}", class))).as_bytes(),
     }
   }
 }
