@@ -184,6 +184,31 @@ impl<T: Default> LinkedList<T> {
 
     unsafe { Box::from_raw(back.as_ptr()) }.value.into()
   }
+
+  pub fn pop_nth(&mut self, n: usize) -> Option<T> {
+    if self.len == 0 || n >= self.len {
+      return None;
+    }
+
+    let mut location = unsafe { self.head.as_mut() }.next.unwrap();
+    unsafe {
+      for _ in 0..n {
+        location = location.as_mut().next.unwrap();
+      }
+    }
+
+    let mut the_prev = unsafe { location.as_mut() }.prev.unwrap();
+    let mut the_next = unsafe { location.as_mut() }.next.unwrap();
+
+    unsafe {
+      the_prev.as_mut().next = Some(the_next);
+      the_next.as_mut().prev = Some(the_prev);
+    };
+
+    self.len -= 1;
+
+    unsafe { Box::from_raw(location.as_ptr()) }.value.into()
+  }
 }
 
 impl<T: Default> LinkedList<T> {
@@ -259,11 +284,13 @@ mod test_linkedlist {
   #[test]
   fn pop_elements() {
     let mut list = LinkedList::from_iter([3, 2, 1, 1, 2, 3]);
+    list.pop_nth(2);
+    list.pop_nth(2);
     let mut collected = vec![];
     for _ in 0..list.len() {
       collected.push(list.pop_front().unwrap());
     }
-    assert_eq!(collected, [3, 2, 1, 1, 2, 3]);
+    assert_eq!(collected, [3, 2, 2, 3]);
   }
 
   #[test]
