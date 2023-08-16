@@ -5,10 +5,21 @@ use std::{
 
 pub mod iter;
 
+#[derive(Default)]
 pub struct ListNode<T: Default> {
   prev: Option<NonNull<ListNode<T>>>,
   next: Option<NonNull<ListNode<T>>>,
   value: T,
+}
+
+impl<T: Default> ListNode<T> {
+  pub fn new(value: T) -> Self {
+    Self {
+      prev: None,
+      next: None,
+      value,
+    }
+  }
 }
 
 impl<T: Default + Display> Display for ListNode<T> {
@@ -36,11 +47,8 @@ impl<T: Default + PartialEq> PartialEq for ListNode<T> {
 impl<T: Default + Eq> Eq for ListNode<T> {}
 
 pub struct LinkedList<T: Default> {
-  /// should always be empty
   head: NonNull<ListNode<T>>,
-  /// should always be empty
   tail: NonNull<ListNode<T>>,
-  /// len
   len: usize,
 }
 
@@ -95,16 +103,8 @@ impl<T: Default> Default for LinkedList<T> {
 
 impl<T: Default> LinkedList<T> {
   pub fn new() -> Self {
-    let mut head = Box::new(ListNode {
-      prev: None,
-      next: None,
-      value: T::default(),
-    });
-    let mut tail = Box::new(ListNode {
-      prev: None,
-      next: None,
-      value: T::default(),
-    });
+    let mut head = Box::<ListNode<T>>::default();
+    let mut tail = Box::<ListNode<T>>::default();
     head.next = Some(unsafe { NonNull::new_unchecked(tail.as_mut()) });
     tail.prev = Some(unsafe { NonNull::new_unchecked(head.as_mut()) });
 
@@ -116,11 +116,7 @@ impl<T: Default> LinkedList<T> {
   }
 
   pub fn push_front(&mut self, value: T) {
-    let new_node = Box::new(ListNode {
-      prev: None,
-      next: None,
-      value,
-    });
+    let new_node = Box::new(ListNode::new(value));
 
     let mut new = unsafe { NonNull::new_unchecked(Box::leak(new_node)) };
     let mut head_next = unsafe { self.head.as_mut() }.next.unwrap();
@@ -136,11 +132,7 @@ impl<T: Default> LinkedList<T> {
   }
 
   pub fn push_back(&mut self, value: T) {
-    let new_node = Box::new(ListNode {
-      prev: None,
-      next: None,
-      value,
-    });
+    let new_node = Box::new(ListNode::new(value));
 
     let mut new = unsafe { NonNull::new_unchecked(Box::leak(new_node)) };
     let mut tail_prev = unsafe { self.tail.as_mut() }.prev.unwrap();
@@ -154,7 +146,9 @@ impl<T: Default> LinkedList<T> {
 
     self.len += 1;
   }
+}
 
+impl<T: Default> LinkedList<T> {
   pub fn pop_front(&mut self) -> Option<T> {
     if self.len == 0 {
       return None;
@@ -190,7 +184,9 @@ impl<T: Default> LinkedList<T> {
 
     unsafe { Box::from_raw(back.as_ptr()) }.value.into()
   }
+}
 
+impl<T: Default> LinkedList<T> {
   pub fn first(&self) -> Option<&T> {
     if self.len == 0 {
       return None;
@@ -210,7 +206,9 @@ impl<T: Default> LinkedList<T> {
       Some(&back.as_ref().value)
     }
   }
+}
 
+impl<T: Default> LinkedList<T> {
   pub fn first_mut(&mut self) -> Option<&mut T> {
     if self.len == 0 {
       return None;
@@ -230,7 +228,9 @@ impl<T: Default> LinkedList<T> {
       Some(&mut back.as_mut().value)
     }
   }
+}
 
+impl<T: Default> LinkedList<T> {
   pub fn len(&self) -> usize {
     self.len
   }
