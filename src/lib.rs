@@ -4,5 +4,6 @@ pub mod lex;
 pub mod object;
 pub mod parse;
 pub mod repl;
+pub mod utils;
 pub mod value;
 pub mod vm;

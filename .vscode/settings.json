@@ -1,5 +1,14 @@
 {
-  "cSpell.words": ["eturn", "falsey", "hile", "rint", "rlox", "unsync", "uper"],
+  "cSpell.words": [
+    "eturn",
+    "falsey",
+    "hile",
+    "linkedlist",
+    "rint",
+    "rlox",
+    "unsync",
+    "uper"
+  ],
   "rust-analyzer.check.command": "clippy",
   "editor.tabSize": 2
 }
