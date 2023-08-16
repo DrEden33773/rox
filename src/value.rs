@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use gc::{Finalize, Trace};
 
 use crate::object::Object;
@@ -25,3 +27,21 @@ impl PartialEq for Value {
 }
 
 impl Eq for Value {}
+
+impl Hash for Value {
+  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    match self {
+      Value::Nil => panic!("unsupported key type: nil"),
+      Value::Boolean(b) => b.hash(state),
+      Value::Integer(i) => i.hash(state),
+      Value::Float(f) => {
+        if f.is_nan() {
+          panic!("unsupported key: NaN")
+        } else {
+          f.to_bits().hash(state)
+        }
+      }
+      Value::Object(obj) => obj.hash(state),
+    }
+  }
+}

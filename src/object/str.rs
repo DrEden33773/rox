@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use super::Object;
 use crate::value::Value;
 use gc::{Finalize, Gc, Trace};
@@ -10,6 +12,13 @@ pub enum Str {
   ShortStr((u8, [u8; SHORT_STR_MAX])),
   MidStr(Gc<(u8, [u8; MID_STR_MAX])>),
   LongStr(Gc<Vec<u8>>),
+}
+
+impl Hash for Str {
+  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    let slice: &[u8] = self.into();
+    slice.hash(state)
+  }
 }
 
 impl std::ops::Add for Str {

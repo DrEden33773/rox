@@ -7,11 +7,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in library 'rlox'",
+      "name": "Debug unit tests in library 'rox'",
       "cargo": {
-        "args": ["test", "--no-run", "--lib", "--package=rlox"],
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=rox"
+        ],
         "filter": {
-          "name": "rlox",
+          "name": "rox",
           "kind": "lib"
         }
       },
@@ -21,11 +26,15 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug executable 'rlox'",
+      "name": "Debug executable 'rox'",
       "cargo": {
-        "args": ["build", "--bin=rlox", "--package=rlox"],
+        "args": [
+          "build",
+          "--bin=rox",
+          "--package=rox"
+        ],
         "filter": {
-          "name": "rlox",
+          "name": "rox",
           "kind": "bin"
         }
       },
@@ -35,11 +44,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'rlox'",
+      "name": "Debug unit tests in executable 'rox'",
       "cargo": {
-        "args": ["test", "--no-run", "--bin=rlox", "--package=rlox"],
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=rox",
+          "--package=rox"
+        ],
         "filter": {
-          "name": "rlox",
+          "name": "rox",
           "kind": "bin"
         }
       },
