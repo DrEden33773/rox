@@ -38,6 +38,18 @@ impl<T: Default + Debug> Debug for ListNode<T> {
   }
 }
 
+impl<T: Default + PartialOrd> PartialOrd for ListNode<T> {
+  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    self.value.partial_cmp(&other.value)
+  }
+}
+
+impl<T: Default + Ord> Ord for ListNode<T> {
+  fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    self.value.cmp(&other.value)
+  }
+}
+
 impl<T: Default + PartialEq> PartialEq for ListNode<T> {
   fn eq(&self, other: &Self) -> bool {
     self.value == other.value
@@ -89,6 +101,30 @@ impl<T: Default + Debug> Debug for LinkedList<T> {
 impl<T: Default + Clone> Clone for LinkedList<T> {
   fn clone(&self) -> Self {
     self.iter().cloned().collect::<Self>()
+  }
+}
+
+impl<T: Default + PartialOrd> PartialOrd for LinkedList<T> {
+  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    for (a, b) in self.iter().zip(other.iter()) {
+      match a.partial_cmp(b) {
+        Some(std::cmp::Ordering::Equal) => continue,
+        x => return x,
+      }
+    }
+    Some(self.len.cmp(&other.len))
+  }
+}
+
+impl<T: Default + Ord> Ord for LinkedList<T> {
+  fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    for (a, b) in self.iter().zip(other.iter()) {
+      match a.cmp(b) {
+        std::cmp::Ordering::Equal => continue,
+        x => return x,
+      }
+    }
+    self.len.cmp(&other.len)
   }
 }
 
