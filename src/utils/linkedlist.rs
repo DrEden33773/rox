@@ -54,7 +54,7 @@ pub struct LinkedList<T: Default> {
 
 impl<T: Default> Drop for LinkedList<T> {
   fn drop(&mut self) {
-    // 1. manually drop all nodes in [head.next .. tail]
+    // 1. drop all nodes in `head.next .. tail`
     // 2. drop head and tail
     self.clear();
     let _ = unsafe { Box::from_raw(self.head.as_ptr()) };
@@ -402,6 +402,9 @@ mod test_linkedlist {
     list.clear();
     assert_eq!(format!("{}", list), "[]");
     assert_eq!(0, list.len());
+    list.push_back(1);
+    assert_eq!(format!("{}", list), "[1]");
+    assert_eq!(1, list.len());
     drop(list);
   }
 }
