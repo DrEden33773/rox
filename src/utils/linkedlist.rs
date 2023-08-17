@@ -52,6 +52,16 @@ pub struct LinkedList<T: Default> {
   len: usize,
 }
 
+impl<T: Default> Drop for LinkedList<T> {
+  fn drop(&mut self) {
+    // 1. manually drop all nodes in [head.next .. tail]
+    // 2. drop head and tail
+    self.clear();
+    let _ = unsafe { Box::from_raw(self.head.as_ptr()) };
+    let _ = unsafe { Box::from_raw(self.tail.as_ptr()) };
+  }
+}
+
 impl<T: Default + Display> Display for LinkedList<T> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(f, "[")?;
@@ -239,6 +249,20 @@ impl<T: Default> LinkedList<T> {
 
     unsafe { Box::from_raw(location.as_ptr()) }.value.into()
   }
+
+  pub fn clear(&mut self) {
+    self.len = 0;
+    unsafe {
+      let mut curr = self.head.as_ref().next.unwrap();
+      while curr.as_ptr() != self.tail.as_ptr() {
+        let next = curr.as_ref().next.unwrap();
+        let _ = Box::from_raw(curr.as_ptr()); // drop
+        curr = next;
+      }
+      self.head.as_mut().next = Some(self.tail);
+      self.tail.as_mut().prev = Some(self.head);
+    };
+  }
 }
 
 impl<T: Default> LinkedList<T> {
@@ -368,5 +392,16 @@ mod test_linkedlist {
   fn format() {
     let list = LinkedList::from_iter([3, 2, 1, 1, 2, 3]);
     assert_eq!(format!("{}", list), "[3, 2, 1, 1, 2, 3]");
+  }
+
+  #[test]
+  fn clear_and_drop() {
+    let mut list = LinkedList::from_iter([3, 2, 1, 1, 2, 3]);
+    assert_eq!(format!("{}", list), "[3, 2, 1, 1, 2, 3]");
+    assert_eq!(6, list.len());
+    list.clear();
+    assert_eq!(format!("{}", list), "[]");
+    assert_eq!(0, list.len());
+    drop(list);
   }
 }
