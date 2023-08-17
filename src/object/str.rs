@@ -87,7 +87,6 @@ impl<'a> From<&'a Object> for &'a [u8] {
   fn from(obj: &'a Object) -> Self {
     match obj {
       Object::String(str) => str.into(),
-      // simple serializer for class
       Object::Class(class) => Box::leak(Box::new(format!("{:#?}", class))).as_bytes(),
     }
   }
