@@ -107,13 +107,7 @@ impl<'a> From<&'a Value> for &'a [u8] {
   fn from(value: &'a Value) -> Self {
     match value {
       Value::Nil => "nil".as_bytes(),
-      Value::Boolean(b) => {
-        if *b {
-          "true".as_bytes()
-        } else {
-          "false".as_bytes()
-        }
-      }
+      Value::Boolean(b) => Box::leak(Box::new(b.to_string())).as_bytes(),
       Value::Integer(i) => Box::leak(Box::new(i.to_string())).as_bytes(),
       Value::Float(f) => Box::leak(Box::new(f.to_string())).as_bytes(),
       Value::Object(obj) => obj.into(),

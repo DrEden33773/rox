@@ -3,9 +3,9 @@ use super::*;
 impl<T: Default> FromIterator<T> for LinkedList<T> {
   fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
     let mut list = Self::new();
-    for item in iter {
+    iter.into_iter().for_each(|item| {
       list.push_back(item);
-    }
+    });
     list
   }
 }
