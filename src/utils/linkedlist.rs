@@ -114,7 +114,9 @@ impl<T: Default> LinkedList<T> {
       len: 0,
     }
   }
+}
 
+impl<T: Default> LinkedList<T> {
   pub fn push_front(&mut self, value: T) {
     let new_node = Box::new(ListNode::new(value));
 
@@ -145,6 +147,34 @@ impl<T: Default> LinkedList<T> {
     };
 
     self.len += 1;
+  }
+
+  pub fn push_nth(&mut self, value: T, n: usize) -> bool {
+    if n > self.len {
+      return false;
+    }
+
+    let new_node = Box::new(ListNode::new(value));
+    let mut new = unsafe { NonNull::new_unchecked(Box::leak(new_node)) };
+
+    let mut location = unsafe { self.head.as_mut() }.next.unwrap();
+    unsafe {
+      for _ in 0..n {
+        location = location.as_mut().next.unwrap();
+      }
+    }
+    let mut the_prev = unsafe { location.as_mut() }.prev.unwrap();
+
+    unsafe {
+      new.as_mut().prev = Some(the_prev);
+      the_prev.as_mut().next = Some(new);
+      new.as_mut().next = Some(location);
+      location.as_mut().prev = Some(new);
+    };
+
+    self.len += 1;
+
+    true
   }
 }
 
@@ -283,7 +313,9 @@ mod test_linkedlist {
 
   #[test]
   fn pop_elements() {
-    let mut list = LinkedList::from_iter([3, 2, 1, 1, 2, 3]);
+    let mut list = LinkedList::from_iter([3, 2, 1, 1]);
+    list.push_nth(3, list.len());
+    list.push_nth(2, list.len() - 1);
     list.pop_nth(2);
     list.pop_nth(2);
     let mut collected = vec![];
